@@ -1,10 +1,11 @@
+# TODO: use Enum for release type
 import json
 import os
 from pprint import pprint
 
 import requests
 
-from utils import increment_version
+from .utils import increment_version
 
 
 API_ROOT = 'https://api.github.com/'
@@ -33,7 +34,6 @@ def get_releases(owner, repo):
 def get_latest_release(owner, repo):
     # TODO: docstring mention that this isn't the same as the repos/latest call from the API
     # TODO: possible to call API and only fetch one result?
-    print('!!!!!', get_releases(owner, repo).json())
     return get_releases(owner, repo).json()[0]
 
 
@@ -52,12 +52,12 @@ def get_merges(commits):
 
 
 def create_release(owner, repo, release_type):
-    print('create_release()', release_type)
+    # print('create_release()', release_type)
     # TODO: handle case where there are no existing releases and treat the base as v0.0.0
     latest_release_tag = get_latest_release(owner, repo)['tag_name']
-    print('latest_release_tag:', latest_release_tag)
+    # print('latest_release_tag:', latest_release_tag)
     next_tag = increment_version(latest_release_tag, release_type)
-    print('next_tag:', next_tag)
+    # print('next_tag:', next_tag)
 
     url = f'repos/{owner}/{repo}/releases'
     # TODO: name should able to be passed as an arg
@@ -71,5 +71,4 @@ def create_release(owner, repo, release_type):
         'body': 'placeholder',
     })
 
-    resp = _post(url, payload)
-    return resp
+    return _post(url, payload)
