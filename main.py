@@ -25,10 +25,25 @@ def get_releases():
     return _get(url)
 
 
+def get_latest_release():
+    # TODO: possible to call API and only fetch one result?
+    return get_releases()[0]
+
+
+def compare_commits(base, head):
+    url = f'repos/{REPO_OWNER}/{REPO_NAME}/compare/{base}...{head}'
+    return _get(url)
+
+
+def get_commits_since_release(release=None):
+    base = release or get_latest_release()['tag_name']
+    return compare_commits(base, 'develop')
+
+
 def main():
-    releases = get_releases()
-    tags = [r['tag_name'] for r in releases]
-    print(tags)
+    # TODO: head should be passed dynamically
+    commits_since_latest_release = get_commits_since_release()
+    print('commits_since_latest_release:', commits_since_latest_release['commits'])
 
 
 if __name__ == '__main__':
