@@ -1,3 +1,4 @@
+falcon
 pytest
 pytest-cov
 python-dotenv==0.10.1
