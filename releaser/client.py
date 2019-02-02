@@ -10,11 +10,15 @@ from .utils import increment_version
 API_ROOT = 'https://api.github.com/'
 
 
-class UnauthorizedError(Exception):
+class ClientError(Exception):
     pass
 
 
-class NotFoundError(Exception):
+class UnauthorizedError(ClientError):
+    pass
+
+
+class NotFoundError(ClientError):
     pass
 
 
