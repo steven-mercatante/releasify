@@ -3,6 +3,12 @@ import re
 pattern = re.compile(r'[vV](?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)')
 
 
+"""Increment a semantic version string
+
+Returns:
+	str -- The incremented semantic version string
+"""
+
 def increment_version(version, release_type):
 	parts = pattern.match(version).groupdict()
 	major = int(parts['major'])
