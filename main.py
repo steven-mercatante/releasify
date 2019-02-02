@@ -40,11 +40,17 @@ def get_commits_since_release(release=None):
     return compare_commits(base, 'develop')
 
 
-def main():
-    # TODO: head should be passed dynamically
-    commits_since_latest_release = get_commits_since_release()
-    print('commits_since_latest_release:', commits_since_latest_release['commits'])
+def get_merges(commits):
+    return [c for c in commits if c['commit']['message'].startswith('Merge pull request')]
 
+
+def main():
+    latest_release = get_latest_release()['tag_name']
+    commits_since_latest_release = get_commits_since_release(latest_release)['commits']
+    merges = get_merges(commits_since_latest_release)
+    print(merges)
+    for m in merges:
+        print(m['commit']['message'])
 
 if __name__ == '__main__':
     main()
