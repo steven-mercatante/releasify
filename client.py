@@ -1,7 +1,8 @@
 import json
 import os
-import requests
 from pprint import pprint
+
+import requests
 
 from utils import increment_version
 
@@ -53,6 +54,7 @@ def get_merges(commits):
 
 def create_release(release_type):
     print('create_release()', release_type)
+    # TODO: handle case where there are no existing releases and treat the base as v0.0.0
     latest_release_tag = get_latest_release()['tag_name']
     # print('latest_release_tag:', latest_release_tag)
     next_tag = increment_version(latest_release_tag, release_type)
@@ -71,4 +73,4 @@ def create_release(release_type):
     })
 
     resp = _post(url, payload)
-    print('resp:', resp)
+    return resp

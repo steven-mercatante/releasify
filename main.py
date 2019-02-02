@@ -1,3 +1,4 @@
+# TODO: deprecate this in favor of cli.py and web.py
 from dotenv import load_dotenv
 load_dotenv()
 
