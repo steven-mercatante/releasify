@@ -1,12 +1,9 @@
-from dotenv import load_dotenv
-load_dotenv()
-
+import base64
 import json
-from base64 import b64decode
 
 import falcon
 
-from .client import create_release
+from .client import Client
 
 
 class AuthMiddleware(object):
@@ -18,11 +15,13 @@ class AuthMiddleware(object):
         if not auth.startswith('Basic '):
             raise falcon.HTTPUnauthorized('Basic auth required')
 
-        encoded_creds = auth.lstrip('Basic ')
-        user, password = b64decode(encoded_creds).decode().split(':')
+        encoded_creds = auth.replace('Basic ', '')
+        user, password = base64.urlsafe_b64decode(encoded_creds).decode().split(':')
+
+        req.context['user'] = user
+        req.context['password'] = password
 
 
-# TODO: add basic auth
 class ReleaseResource(object):
     def on_post(self, req, resp):
         payload = json.load(req.bounded_stream)
@@ -32,7 +31,8 @@ class ReleaseResource(object):
         repo = payload['repo']
         release_type = payload['release_type']
 
-        result = create_release(owner, repo, release_type)
+        client = Client(req.context['user'], req.context['password'])
+        result = client.create_release(owner, repo, release_type)
         resp.media = result.status_code
 
 
