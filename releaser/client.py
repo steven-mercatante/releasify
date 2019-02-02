@@ -8,6 +8,10 @@ import requests
 from .utils import increment_version
 
 
+class UnauthorizedError(Exception):
+    pass
+
+
 API_ROOT = 'https://api.github.com/'
 
 
@@ -17,13 +21,22 @@ def _get_auth():
 
 def _get(url):
     full_url = f'{API_ROOT}{url}'
-    return requests.get(full_url, auth=_get_auth())
+    resp = requests.get(full_url, auth=_get_auth())
+
+    if resp.status_code == 401:
+        raise UnauthorizedError()
+
+    return resp
 
 
 def _post(url, data):
     full_url = f'{API_ROOT}{url}'
-    # print('full_url:', full_url)
-    return requests.post(full_url, auth=_get_auth(), data=data)
+    resp = requests.post(full_url, auth=_get_auth(), data=data)
+
+    if resp.status_code == 401:
+        raise UnauthorizedError()
+
+    return resp
 
 
 def get_releases(owner, repo):
@@ -34,7 +47,8 @@ def get_releases(owner, repo):
 def get_latest_release(owner, repo):
     # TODO: docstring mention that this isn't the same as the repos/latest call from the API
     # TODO: possible to call API and only fetch one result?
-    return get_releases(owner, repo).json()[0]
+    releases = get_releases(owner, repo)
+    return releases.json()[0]
 
 
 def compare_commits(owner, repo, base, head):
