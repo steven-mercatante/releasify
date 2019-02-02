@@ -3,7 +3,7 @@ import json
 
 import falcon
 
-from .client import Client
+from .client import Client, UnauthorizedError
 
 
 class AuthMiddleware(object):
@@ -33,8 +33,19 @@ class ReleaseResource(object):
 
         client = Client(req.context['user'], req.context['password'])
         result = client.create_release(owner, repo, release_type)
+
+        # TODO: map result status code to Falcon status code?
         resp.media = result.status_code
 
 
+def handle_error(exception, req, resp, params):
+    """Map custom exceptions to Falcon exceptions"""
+    if isinstance(exception, UnauthorizedError):
+        raise falcon.HTTPUnauthorized()
+
+
 api = falcon.API(middleware=[AuthMiddleware()])
+
+api.add_error_handler(UnauthorizedError, handle_error)
+
 api.add_route('/releases', ReleaseResource())
