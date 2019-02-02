@@ -1,6 +1,6 @@
 import re
 
-pattern = re.compile(r'(?P<prefix>[vV])(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)')
+pattern = re.compile(r'[vV](?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)')
 
 
 # TODO: unit test
