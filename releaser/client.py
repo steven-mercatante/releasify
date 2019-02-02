@@ -1,4 +1,3 @@
-# TODO: use Enum for release type
 import json
 import os
 from pprint import pprint
@@ -8,11 +7,15 @@ import requests
 from .utils import increment_version
 
 
+API_ROOT = 'https://api.github.com/'
+
+
 class UnauthorizedError(Exception):
     pass
 
 
-API_ROOT = 'https://api.github.com/'
+class NotFoundError(Exception):
+    pass
 
 
 class Client(object):
@@ -23,12 +26,18 @@ class Client(object):
     def _get_auth(self):
         return self.user, self.password
 
+    @staticmethod
+    def _handle_status_code(status_code):
+        if status_code == 401:
+            raise UnauthorizedError()
+        elif status_code == 404:
+            raise NotFoundError()
+
     def _get(self, url):
         full_url = f'{API_ROOT}{url}'
         resp = requests.get(full_url, auth=self._get_auth())
 
-        if resp.status_code == 401:
-            raise UnauthorizedError()
+        self._handle_status_code(resp.status_code)
 
         return resp
 
@@ -36,8 +45,7 @@ class Client(object):
         full_url = f'{API_ROOT}{url}'
         resp = requests.post(full_url, auth=self._get_auth(), data=data)
 
-        if resp.status_code == 401:
-            raise UnauthorizedError()
+        self._handle_status_code(resp.status_code)
 
         return resp
 
@@ -60,6 +68,7 @@ class Client(object):
         return self.compare_commits(base, 'master')
 
     def create_release(self, owner, repo, release_type, draft=False, prerelease=True):
+        # TODO: use Enum for release type
         # TODO: handle case where there are no existing releases and treat the base as v0.0.0
         latest_release_tag = self.get_latest_release(owner, repo)['tag_name']
         next_tag = increment_version(latest_release_tag, release_type)

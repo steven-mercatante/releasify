@@ -3,7 +3,7 @@ import json
 
 import falcon
 
-from .client import Client, UnauthorizedError
+from .client import Client, NotFoundError, UnauthorizedError
 
 
 class AuthMiddleware(object):
@@ -42,10 +42,13 @@ def handle_error(exception, req, resp, params):
     """Map custom exceptions to Falcon exceptions"""
     if isinstance(exception, UnauthorizedError):
         raise falcon.HTTPUnauthorized()
+    elif isinstance(exception, NotFoundError):
+        raise falcon.HTTPNotFound()
 
 
 api = falcon.API(middleware=[AuthMiddleware()])
 
+api.add_error_handler(NotFoundError, handle_error)
 api.add_error_handler(UnauthorizedError, handle_error)
 
 api.add_route('/releases', ReleaseResource())
