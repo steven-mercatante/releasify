@@ -51,24 +51,19 @@ def get_merges(commits):
     return [c for c in commits if c['commit']['message'].startswith('Merge pull request')]
 
 
-def create_release(owner, repo, release_type):
-    # print('create_release()', release_type)
+def create_release(owner, repo, release_type, draft=False, prerelease=True):
     # TODO: handle case where there are no existing releases and treat the base as v0.0.0
     latest_release_tag = get_latest_release(owner, repo)['tag_name']
-    # print('latest_release_tag:', latest_release_tag)
     next_tag = increment_version(latest_release_tag, release_type)
-    # print('next_tag:', next_tag)
 
     url = f'repos/{owner}/{repo}/releases'
-    # TODO: name should able to be passed as an arg
-    # TODO: draft should able to be passed as an arg
     payload = json.dumps({
         'tag_name': next_tag, 
         'target_commitish': 'master',
         'name': next_tag, 
-        'draft': False, 
-        'prerelease': True, 
-        'body': 'placeholder',
+        'draft': draft, 
+        'prerelease': prerelease, 
+        'body': 'placeholder',  # TODO: pass this as arg
     })
 
     return _post(url, payload)
