@@ -28,6 +28,13 @@ class AuthMiddleware(object):
 
 
 class ReleaseResource(object):
+    @staticmethod
+    def _convert_status_code(status_code):
+        try:
+            return getattr(falcon, f'HTTP_{status_code}')
+        except (AttributeError):
+            return falcon.HTTP_500
+
     def on_post(self, req, resp):
         payload = json.load(req.bounded_stream)
 
@@ -37,10 +44,15 @@ class ReleaseResource(object):
         release_type = payload['release_type']
 
         client = Client(req.context['user'], req.context['password'])
-        result = client.create_release(owner, repo, release_type)
 
-        # TODO: map result status code to Falcon status code?
-        resp.media = result.status_code
+        result = client.create_release(owner, repo, release_type)
+        
+        resp.status = self._convert_status_code(result['resp'].status_code)
+
+        resp.media = {
+            'body': result['body'],
+            'tag_name': result['tag_name'],
+        }
 
 
 def handle_error(exception, req, resp, params):
