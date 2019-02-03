@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pprint import pprint
 
 import requests
@@ -31,17 +32,17 @@ class Client(object):
         return self.user, self.password
 
     @staticmethod
-    def _handle_status_code(status_code):
-        if status_code == 401:
-            raise UnauthorizedError()
-        elif status_code == 404:
-            raise NotFoundError()
+    def _handle_api_response(resp):
+        if resp.status_code == 401:
+            raise UnauthorizedError(resp.content)
+        elif resp.status_code == 404:
+            raise NotFoundError(resp.content)
 
     def _get(self, url):
         full_url = f'{API_ROOT}{url}'
         resp = requests.get(full_url, auth=self._get_auth())
 
-        self._handle_status_code(resp.status_code)
+        self._handle_api_response(resp)
 
         return resp
 
@@ -49,9 +50,13 @@ class Client(object):
         full_url = f'{API_ROOT}{url}'
         resp = requests.post(full_url, auth=self._get_auth(), data=data)
 
-        self._handle_status_code(resp.status_code)
+        self._handle_api_response(resp)
 
         return resp
+
+    def get_default_branch(self, owner, repo):
+        url = f'repos/{owner}/{repo}'
+        return self._get(url).json()['default_branch']
 
     def get_releases(self, owner, repo):
         url = f'repos/{owner}/{repo}/releases'
@@ -67,28 +72,53 @@ class Client(object):
         url = f'repos/{owner}/{repo}/compare/{base}...{head}'
         return self._get(url)
 
-    def get_commits_since_release(self, release=None):
-        base = release or self.get_latest_release()['tag_name']
-        return self.compare_commits(base, 'master')
+    def get_commits_since_release(self, owner, repo, release=None):
+        base = release or self.get_latest_release(owner, repo)['tag_name']
+        default_branch = self.get_default_branch(owner, repo)
+        return self.compare_commits(owner, repo, base, default_branch)
 
     def create_release(self, owner, repo, release_type, draft=False, prerelease=True):
         # TODO: use Enum for release type
+        commits = self.get_commits_since_release(owner, repo).json()['commits']
+        # pprint(commits)
+        merge_messages = get_merge_messages(commits)
+        # merge_messages = ['foo', 'bar', 'baz']
+        pprint(merge_messages)
+
+        body = build_release_body(merge_messages)
+
         # TODO: handle case where there are no existing releases and treat the base as v0.0.0
         latest_release_tag = self.get_latest_release(owner, repo)['tag_name']
         next_tag = increment_version(latest_release_tag, release_type)
 
-        url = f'repos/{owner}/{repo}/releases'
-        payload = json.dumps({
-            'tag_name': next_tag, 
-            'target_commitish': 'master',
-            'name': next_tag, 
-            'draft': draft, 
-            'prerelease': prerelease, 
-            'body': 'placeholder',  # TODO: pass this as arg
-        })
+        # url = f'repos/{owner}/{repo}/releases'
+        # payload = json.dumps({
+        #     'tag_name': next_tag, 
+        #     'target_commitish': 'master',
+        #     'name': next_tag, 
+        #     'draft': draft, 
+        #     'prerelease': prerelease, 
+        #     'body': body,  # TODO: pass this as arg
+        # })
 
-        return self._post(url, payload)
+        # return self._post(url, payload)
 
 
-def get_merges(commits):
-    return [c for c in commits if c['commit']['message'].startswith('Merge pull request')]
+def get_merge_messages(commits):
+    # TODO: unit test
+    return [
+        massage_merge_message(c['commit']['message'])
+        for c in commits
+        if c['commit']['message'].startswith('Merge pull request')
+    ]
+
+
+def massage_merge_message(message):
+    # TODO: unit test
+    # Merge messages seem to start with a "Merge pull request #x from owner/branch\n\n",
+    # so let's grab everything after that.
+    return message.split('\n\n', 1)[1]
+
+
+def build_release_body(messages):
+    return '\n'.join(f'- {msg}' for msg in messages)
