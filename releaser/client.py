@@ -105,7 +105,6 @@ class Client(object):
 
 
 def get_merge_messages(commits):
-    # TODO: unit test
     return [
         massage_merge_message(c['commit']['message'])
         for c in commits
