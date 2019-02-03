@@ -34,9 +34,9 @@ class Client(object):
     @staticmethod
     def _handle_api_response(resp):
         if resp.status_code == 401:
-            raise UnauthorizedError(resp.content)
+            raise UnauthorizedError(resp)
         elif resp.status_code == 404:
-            raise NotFoundError(resp.content)
+            raise NotFoundError(resp)
 
     def _get(self, url):
         full_url = f'{API_ROOT}{url}'
@@ -80,10 +80,7 @@ class Client(object):
     def create_release(self, owner, repo, release_type, draft=False, prerelease=True):
         # TODO: use Enum for release type
         commits = self.get_commits_since_release(owner, repo).json()['commits']
-        # pprint(commits)
         merge_messages = get_merge_messages(commits)
-        # merge_messages = ['foo', 'bar', 'baz']
-        pprint(merge_messages)
 
         body = build_release_body(merge_messages)
 
@@ -91,17 +88,23 @@ class Client(object):
         latest_release_tag = self.get_latest_release(owner, repo)['tag_name']
         next_tag = increment_version(latest_release_tag, release_type)
 
-        # url = f'repos/{owner}/{repo}/releases'
-        # payload = json.dumps({
-        #     'tag_name': next_tag, 
-        #     'target_commitish': 'master',
-        #     'name': next_tag, 
-        #     'draft': draft, 
-        #     'prerelease': prerelease, 
-        #     'body': body,  # TODO: pass this as arg
-        # })
+        url = f'repos/{owner}/{repo}/releases'
+        payload = json.dumps({
+            'tag_name': next_tag, 
+            'target_commitish': 'master',
+            'name': next_tag, 
+            'draft': draft, 
+            'prerelease': prerelease, 
+            'body': body,
+        })
 
-        # return self._post(url, payload)
+        resp = self._post(url, payload)
+
+        return {
+            'resp': resp,
+            'tag_name': next_tag,
+            'body': body,
+        }
 
 
 def get_merge_messages(commits):
