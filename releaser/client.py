@@ -114,10 +114,11 @@ def get_merge_messages(commits):
 
 
 def massage_merge_message(message):
-    # TODO: unit test
     # Merge messages seem to start with a "Merge pull request #x from owner/branch\n\n",
     # so let's grab everything after that.
-    return message.split('\n\n', 1)[1]
+    if message is None:
+        return ''
+    return re.sub(r'(Merge pull request.*\n\n)', '', message)
 
 
 def build_release_body(messages):
