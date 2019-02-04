@@ -101,6 +101,7 @@ class Client(object):
         resp = self._post(url, payload)
 
         return {
+            'ok': resp.status_code == 201,
             'resp': resp,
             'tag_name': next_tag,
             'body': body,

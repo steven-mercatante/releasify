@@ -21,5 +21,8 @@ if __name__ == '__main__':
     client = Client(os.getenv('GITHUB_USER'), os.getenv('GITHUB_PASSWORD'))
     result = client.create_release(args.owner, args.repo, args.release_type)
 
-    if result['resp'].status_code == 201:
+    if result['ok']:
         print(f'Created release {result["tag_name"]}')
+    else:
+        # TODO: show error code & message?
+        pass
