@@ -77,7 +77,7 @@ class Client(object):
         default_branch = self.get_default_branch(owner, repo)
         return self.compare_commits(owner, repo, base, default_branch)
 
-    def create_release(self, owner, repo, release_type, draft=False, prerelease=True):
+    def create_release(self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False):
         # TODO: use Enum for release type
         commits = self.get_commits_since_release(owner, repo).json()['commits']
         merge_messages = get_merge_messages(commits)
@@ -98,10 +98,14 @@ class Client(object):
             'body': body,
         })
 
-        resp = self._post(url, payload)
+        if dry_run:
+            status_code = 201
+            resp = {'status_code': status_code}
+        else:
+            resp = self._post(url, payload)
 
         return {
-            'ok': resp.status_code == 201,
+            'ok': status_code == 201,
             'resp': resp,
             'tag_name': next_tag,
             'body': body,
