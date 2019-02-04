@@ -72,14 +72,16 @@ class Client(object):
         url = f'repos/{owner}/{repo}/compare/{base}...{head}'
         return self._get(url)
 
-    def get_commits_since_release(self, owner, repo, release=None):
+    def get_commits_since_release(self, owner, repo, head, release=None):
         base = release or self.get_latest_release(owner, repo)['tag_name']
-        default_branch = self.get_default_branch(owner, repo)
-        return self.compare_commits(owner, repo, base, default_branch)
+        return self.compare_commits(owner, repo, base, head)
 
     def create_release(self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False):
+        # TODO: this should be an optional arg
+        target_branch = self.get_default_branch(owner, repo)
+
         # TODO: use Enum for release type
-        commits = self.get_commits_since_release(owner, repo).json()['commits']
+        commits = self.get_commits_since_release(owner, repo, target_branch).json()['commits']
         merge_messages = get_merge_messages(commits)
 
         body = build_release_body(merge_messages)
@@ -88,10 +90,11 @@ class Client(object):
         latest_release_tag = self.get_latest_release(owner, repo)['tag_name']
         next_tag = increment_version(latest_release_tag, release_type)
 
+
         url = f'repos/{owner}/{repo}/releases'
         payload = json.dumps({
             'tag_name': next_tag, 
-            'target_commitish': 'master',
+            'target_commitish': target_branch,
             'name': next_tag, 
             'draft': draft, 
             'prerelease': prerelease, 
@@ -103,6 +106,7 @@ class Client(object):
             resp = {'status_code': status_code}
         else:
             resp = self._post(url, payload)
+            status_code = resp.status_code
 
         return {
             'ok': status_code == 201,
