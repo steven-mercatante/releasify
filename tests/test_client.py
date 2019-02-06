@@ -1,6 +1,10 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from releaser.client import (
+    Client,
+    NoCommitsError,
     build_release_body,
     get_merge_messages,
     massage_merge_message,
@@ -46,3 +50,13 @@ def test_get_merge_messages_with_empty_commits():
 ])
 def test_massage_merge_message(input, expected):
     assert massage_merge_message(input) == expected
+
+
+def test_create_release_exits_if_no_commits_since_last_release():
+    client = Client('user', 'password')
+    client.get_default_branch = MagicMock(return_value='master')
+    client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
+    client.get_commits_since_release = MagicMock(return_value=[])
+    
+    with pytest.raises(NoCommitsError):
+        client.create_release('owner', 'repo', 'major')
