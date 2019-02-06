@@ -66,26 +66,26 @@ class Client(object):
         url = f'repos/{owner}/{repo}/releases'
         return self._get(url)
 
-    def get_latest_release(self, owner, repo):
+    def get_latest_release_tag(self, owner, repo):
         # TODO: docstring mention that this isn't the same as the repos/latest call from the API
         # TODO: possible to call API and only fetch one result?
         releases = self.get_releases(owner, repo)
-        return releases.json()[0]
+        return releases.json()[0]['tag_name']
 
     def compare_commits(self, owner, repo, base, head):
         url = f'repos/{owner}/{repo}/compare/{base}...{head}'
         return self._get(url)
 
     def get_commits_since_release(self, owner, repo, head, release=None):
-        base = release or self.get_latest_release(owner, repo)['tag_name']
-        return self.compare_commits(owner, repo, base, head)
+        base = release or self.get_latest_release_tag(owner, repo)
+        return self.compare_commits(owner, repo, base, head).json()['commits']
 
     def create_release(self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False):
         # TODO: this should be an optional arg
         target_branch = self.get_default_branch(owner, repo)
 
         # TODO: use Enum for release type
-        commits = self.get_commits_since_release(owner, repo, target_branch).json()['commits']
+        commits = self.get_commits_since_release(owner, repo, target_branch)
         if len(commits) == 0:
             raise NoCommitsError()
 
@@ -94,7 +94,7 @@ class Client(object):
         body = build_release_body(merge_messages)
 
         # TODO: handle case where there are no existing releases and treat the base as v0.0.0
-        latest_release_tag = self.get_latest_release(owner, repo)['tag_name']
+        latest_release_tag = self.get_latest_release_tag(owner, repo)
         next_tag = increment_version(latest_release_tag, release_type)
 
         url = f'repos/{owner}/{repo}/releases'
