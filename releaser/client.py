@@ -23,6 +23,10 @@ class NotFoundError(ClientError):
     pass
 
 
+class NoCommitsError(ClientError):
+    pass
+
+
 class Client(object):
     def __init__(self, user, password):
         self.user = user
@@ -82,6 +86,9 @@ class Client(object):
 
         # TODO: use Enum for release type
         commits = self.get_commits_since_release(owner, repo, target_branch).json()['commits']
+        if len(commits) == 0:
+            raise NoCommitsError()
+
         merge_messages = get_merge_messages(commits)
 
         body = build_release_body(merge_messages)
@@ -89,7 +96,6 @@ class Client(object):
         # TODO: handle case where there are no existing releases and treat the base as v0.0.0
         latest_release_tag = self.get_latest_release(owner, repo)['tag_name']
         next_tag = increment_version(latest_release_tag, release_type)
-
 
         url = f'repos/{owner}/{repo}/releases'
         payload = json.dumps({
