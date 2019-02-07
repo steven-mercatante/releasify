@@ -15,7 +15,7 @@ API_ROOT = 'https://api.github.com/'
 
 class ClientError(Exception):
     def __init__(self, message=None):
-        self.message = message
+        super(ClientError, self).__init__(message)
 
 
 class UnauthorizedError(ClientError):
@@ -28,13 +28,15 @@ class NotFoundError(ClientError):
 
 class NoCommitsError(ClientError):
     def __init__(self):
-        self.message = 'No commits since last release'
+        message = 'No commits since last release'
+        super(NoCommitsError, self).__init__(message)
 
 
 class InvalidReleaseTypeError(ClientError):
     def __init__(self, release_type):
         release_types = ', '.join(member.value for _, member in ReleaseType.__members__.items())
-        self.message = f'{release_type} is invalid. Must be one of: {release_types}'
+        message = f'`{release_type}` is not a valid release type. Must be one of: {release_types}'
+        super(InvalidReleaseTypeError, self).__init__(message)
 
 
 class ReleaseType(Enum):
