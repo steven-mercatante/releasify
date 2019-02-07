@@ -6,6 +6,7 @@ import falcon
 from .client import (
     Client, 
     ClientError,
+    InvalidReleaseTypeError,
     NoCommitsError,
     NotFoundError,
     UnauthorizedError,
@@ -62,12 +63,12 @@ def handle_error(exception, req, resp, params):
     """Map custom exceptions to Falcon exceptions"""
     if isinstance(exception, UnauthorizedError):
         raise falcon.HTTPUnauthorized()
-    elif isinstance(exception, NoCommitsError):
-        raise falcon.HTTPError(status=falcon.HTTP_400, description=exception.message)
+    elif isinstance(exception, (InvalidReleaseTypeError, NoCommitsError)):
+        raise falcon.HTTPError(status=falcon.HTTP_400, description=str(exception))
     elif isinstance(exception, NotFoundError):
         raise falcon.HTTPNotFound()
     else:
-        raise falcon.HTTPInternalServerError()
+        raise falcon.HTTPInternalServerError(description=str(exception))
 
 
 api = falcon.API(middleware=[AuthMiddleware()])

@@ -4,6 +4,7 @@ import pytest
 
 from releasify.client import (
     Client,
+    InvalidReleaseTypeError,
     NoCommitsError,
     build_release_body,
     get_merge_messages,
@@ -71,3 +72,10 @@ def test_create_release_with_force_release_flag_doesnt_raise():
     resp = client.create_release('owner', 'repo', 'major', dry_run=True, force_release=True)
 
     assert resp['ok'] is True
+
+
+def test_passing_invalid_release_type_raises():
+    client = Client('user', 'password')
+    
+    with pytest.raises(InvalidReleaseTypeError):
+        resp = client.create_release('owner', 'repo', 'bad_release_type', dry_run=True)
