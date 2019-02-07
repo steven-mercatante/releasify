@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from enum import Enum
 from pprint import pprint
 from types import SimpleNamespace
 
@@ -28,6 +29,18 @@ class NotFoundError(ClientError):
 class NoCommitsError(ClientError):
     def __init__(self):
         self.message = 'No commits since last release'
+
+
+class InvalidReleaseTypeError(ClientError):
+    def __init__(self, release_type):
+        release_types = ', '.join(member.value for _, member in ReleaseType.__members__.items())
+        self.message = f'{release_type} is invalid. Must be one of: {release_types}'
+
+
+class ReleaseType(Enum):
+    MAJOR = 'major'
+    MINOR = 'minor'
+    PATCH = 'patch'
 
 
 class Client(object):
@@ -86,10 +99,14 @@ class Client(object):
     def create_release(
         self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False
     ):
+        try:
+            ReleaseType(release_type)
+        except (ValueError):
+            raise InvalidReleaseTypeError(release_type)
+
         # TODO: this should be an optional arg
         target_branch = self.get_default_branch(owner, repo)
 
-        # TODO: use Enum for release type
         commits = self.get_commits_since_release(owner, repo, target_branch)
         if len(commits) == 0 and not force_release:
             raise NoCommitsError()
