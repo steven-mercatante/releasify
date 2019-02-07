@@ -80,13 +80,15 @@ class Client(object):
         base = release or self.get_latest_release_tag(owner, repo)
         return self.compare_commits(owner, repo, base, head).json()['commits']
 
-    def create_release(self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False):
+    def create_release(
+        self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False
+    ):
         # TODO: this should be an optional arg
         target_branch = self.get_default_branch(owner, repo)
 
         # TODO: use Enum for release type
         commits = self.get_commits_since_release(owner, repo, target_branch)
-        if len(commits) == 0:
+        if len(commits) == 0 and not force_release:
             raise NoCommitsError()
 
         merge_messages = get_merge_messages(commits)
