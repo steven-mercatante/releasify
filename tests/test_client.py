@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from releaser.client import (
+from releasify.client import (
     Client,
     NoCommitsError,
     build_release_body,

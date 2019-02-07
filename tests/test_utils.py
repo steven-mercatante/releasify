@@ -1,6 +1,6 @@
 import pytest
 
-from releaser.utils import increment_version
+from releasify.utils import increment_version
 
 
 @pytest.mark.parametrize("test_input,expected", [

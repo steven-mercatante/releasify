@@ -11,7 +11,7 @@ You can invoke this script via CLI or API.
 
 ### CLI:
 ```bash
-$ python releaser/cli.py owner_name repo_name minor
+$ python releasify/cli.py owner_name repo_name minor
 ```
 
 ### API:
