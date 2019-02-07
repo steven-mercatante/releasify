@@ -2,6 +2,7 @@ import json
 import os
 import re
 from pprint import pprint
+from types import SimpleNamespace
 
 import requests
 
@@ -12,7 +13,8 @@ API_ROOT = 'https://api.github.com/'
 
 
 class ClientError(Exception):
-    pass
+    def __init__(self, message=None):
+        self.message = message
 
 
 class UnauthorizedError(ClientError):
@@ -24,7 +26,8 @@ class NotFoundError(ClientError):
 
 
 class NoCommitsError(ClientError):
-    pass
+    def __init__(self):
+        self.message = 'No commits since last release'
 
 
 class Client(object):
@@ -111,7 +114,8 @@ class Client(object):
 
         if dry_run:
             status_code = 201
-            resp = {'status_code': status_code}
+            # Use SimpleNamespace so we get attribute access
+            resp = SimpleNamespace(**{'status_code': status_code})
         else:
             resp = self._post(url, payload)
             status_code = resp.status_code
