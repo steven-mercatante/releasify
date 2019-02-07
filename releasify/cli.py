@@ -23,13 +23,17 @@ if __name__ == '__main__':
 
     # TODO: let user & password be passed in via optional CLI args
     client = Client(os.getenv('GITHUB_USER'), os.getenv('GITHUB_PASSWORD'))
-    result = client.create_release(
-        args.owner, args.repo, args.type, dry_run=args.dryrun, force_release=args.force
-    )
 
-    if result['ok']:
-        print(f'Release name: {result["tag_name"]}')
-        print(f'Release body: {result["body"]}')
-    else:
-        # TODO: show error code & message?
-        pass
+    try:
+        result = client.create_release(
+            args.owner, args.repo, args.type, dry_run=args.dryrun, force_release=args.force
+        )
+
+        if result['ok']:
+            print(f'Release name: {result["tag_name"]}')
+            print(f'Release body: {result["body"]}')
+        else:
+            # TODO: show error code & message?
+            pass
+    except (Exception) as e:
+        print(e)
