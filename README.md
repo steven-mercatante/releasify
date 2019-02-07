@@ -1,6 +1,7 @@
-# Release Management Tool
+# Releasify
 
-[![Build Status](https://travis-ci.org/steven-mercatante/releases.svg?branch=master)](https://travis-ci.org/steven-mercatante/releases)
+[![Build Status](https://travis-ci.org/steven-mercatante/releasify.svg?branch=master)](https://travis-ci.org/steven-mercatante/releasify)
+[![codecov](https://codecov.io/gh/steven-mercatante/releasify/branch/master/graph/badge.svg)](https://codecov.io/gh/steven-mercatante/releasify)
 
 ## What is this?
 The aim of this tool is to make automatically publishing GitHub semver releases easy.
