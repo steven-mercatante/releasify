@@ -5,10 +5,12 @@ import falcon
 
 from .client import (
     Client, 
-    ClientError, 
-    NotFoundError, 
+    ClientError,
+    NoCommitsError,
+    NotFoundError,
     UnauthorizedError,
 )
+from .utils import boolify
 
 
 class AuthMiddleware(object):
@@ -42,11 +44,12 @@ class ReleaseResource(object):
         owner = payload['owner']
         repo = payload['repo']
         release_type = payload['release_type']
+        dry_run = boolify(payload.get('dry_run', False))
+        force_release = boolify(payload.get('force_release', False))
 
         client = Client(req.context['user'], req.context['password'])
 
-        result = client.create_release(owner, repo, release_type)
-        
+        result = client.create_release(owner, repo, release_type, dry_run=dry_run, force_release=force_release)
         resp.status = self._convert_status_code(result['resp'].status_code)
 
         resp.media = {
@@ -59,8 +62,12 @@ def handle_error(exception, req, resp, params):
     """Map custom exceptions to Falcon exceptions"""
     if isinstance(exception, UnauthorizedError):
         raise falcon.HTTPUnauthorized()
+    elif isinstance(exception, NoCommitsError):
+        raise falcon.HTTPError(status=falcon.HTTP_400, description=exception.message)
     elif isinstance(exception, NotFoundError):
         raise falcon.HTTPNotFound()
+    else:
+        raise falcon.HTTPInternalServerError()
 
 
 api = falcon.API(middleware=[AuthMiddleware()])

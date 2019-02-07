@@ -17,11 +17,15 @@ if __name__ == '__main__':
     parser.add_argument('type', help='The type of release')
     parser.add_argument('-d', '--dryrun', help='Perform a dry run (doesn\'t create the release)', 
                         action='store_true')
+    parser.add_argument('-f', '--force', help='Create a release even if there aren\'t any commits since the last release', 
+                        action='store_true')
     args = parser.parse_args()
 
     # TODO: let user & password be passed in via optional CLI args
     client = Client(os.getenv('GITHUB_USER'), os.getenv('GITHUB_PASSWORD'))
-    result = client.create_release(args.owner, args.repo, args.type, dry_run=args.dryrun)
+    result = client.create_release(
+        args.owner, args.repo, args.type, dry_run=args.dryrun, force_release=args.force
+    )
 
     if result['ok']:
         print(f'Release name: {result["tag_name"]}')
