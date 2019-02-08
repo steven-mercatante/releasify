@@ -5,13 +5,18 @@ import falcon
 
 from .client import (
     Client, 
-    ClientError,
     InvalidReleaseTypeError,
     NoCommitsError,
     NotFoundError,
     UnauthorizedError,
 )
 from .utils import boolify
+
+
+class MissingRequiredArgError(Exception):
+    def __init__(self, arg):
+        message = f'You\'re missing the required `{arg}` argument'
+        super(MissingRequiredArgError, self).__init__(message)
 
 
 class AuthMiddleware(object):
@@ -42,7 +47,10 @@ class ReleaseResource(object):
         payload = json.load(req.bounded_stream)
 
         # TODO: owner, repo, release_type should be required
-        owner = payload['owner']
+        try:
+            owner = payload['owner']
+        except (KeyError):
+            raise MissingRequiredArgError('owner')
         repo = payload['repo']
         release_type = payload['release_type']
         dry_run = boolify(payload.get('dry_run', False))
@@ -73,7 +81,7 @@ def handle_error(exception, req, resp, params):
 
 def create_api():
     api = falcon.API(middleware=[AuthMiddleware()])
-    api.add_error_handler(ClientError, handle_error)
+    api.add_error_handler(Exception, handle_error)
     api.add_route('/releases', ReleaseResource())
     return api
 
