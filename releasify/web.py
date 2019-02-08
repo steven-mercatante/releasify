@@ -5,13 +5,18 @@ import falcon
 
 from .client import (
     Client, 
-    ClientError,
     InvalidReleaseTypeError,
     NoCommitsError,
     NotFoundError,
     UnauthorizedError,
 )
 from .utils import boolify
+
+
+class MissingRequiredArgError(Exception):
+    def __init__(self, arg):
+        message = f'You\'re missing the required `{arg}` argument'
+        super(MissingRequiredArgError, self).__init__(message)
 
 
 class AuthMiddleware(object):
@@ -23,8 +28,8 @@ class AuthMiddleware(object):
         if not auth.startswith('Basic '):
             raise falcon.HTTPUnauthorized('Basic auth required')
 
-        encoded_creds = auth.replace('Basic ', '')
-        user, password = base64.urlsafe_b64decode(encoded_creds).decode().split(':')
+        token = auth.replace('Basic ', '')
+        user, password = base64.urlsafe_b64decode(token).decode('utf-8').split(':')
 
         req.context['user'] = user
         req.context['password'] = password
@@ -41,10 +46,9 @@ class ReleaseResource(object):
     def on_post(self, req, resp):
         payload = json.load(req.bounded_stream)
 
-        # TODO: owner, repo, release_type should be required
-        owner = payload['owner']
-        repo = payload['repo']
-        release_type = payload['release_type']
+        owner = get_required_arg(payload, 'owner')
+        repo = get_required_arg(payload, 'repo')
+        release_type = get_required_arg(payload, 'release_type')
         dry_run = boolify(payload.get('dry_run', False))
         force_release = boolify(payload.get('force_release', False))
 
@@ -59,6 +63,13 @@ class ReleaseResource(object):
         }
 
 
+def get_required_arg(args, arg_name):
+    try:
+        return args[arg_name]
+    except (KeyError):
+        raise MissingRequiredArgError(arg_name)
+
+
 def handle_error(exception, req, resp, params):
     """Map custom exceptions to Falcon exceptions"""
     if isinstance(exception, UnauthorizedError):
@@ -71,8 +82,11 @@ def handle_error(exception, req, resp, params):
         raise falcon.HTTPInternalServerError(description=str(exception))
 
 
-api = falcon.API(middleware=[AuthMiddleware()])
+def create_api():
+    api = falcon.API(middleware=[AuthMiddleware()])
+    api.add_error_handler(Exception, handle_error)
+    api.add_route('/releases', ReleaseResource())
+    return api
 
-api.add_error_handler(ClientError, handle_error)
 
-api.add_route('/releases', ReleaseResource())
+api = create_api()
