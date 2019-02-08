@@ -23,8 +23,8 @@ class AuthMiddleware(object):
         if not auth.startswith('Basic '):
             raise falcon.HTTPUnauthorized('Basic auth required')
 
-        encoded_creds = auth.replace('Basic ', '')
-        user, password = base64.urlsafe_b64decode(encoded_creds).decode().split(':')
+        token = auth.replace('Basic ', '')
+        user, password = base64.urlsafe_b64decode(token).decode('utf-8').split(':')
 
         req.context['user'] = user
         req.context['password'] = password
@@ -71,8 +71,11 @@ def handle_error(exception, req, resp, params):
         raise falcon.HTTPInternalServerError(description=str(exception))
 
 
-api = falcon.API(middleware=[AuthMiddleware()])
+def create_api():
+    api = falcon.API(middleware=[AuthMiddleware()])
+    api.add_error_handler(ClientError, handle_error)
+    api.add_route('/releases', ReleaseResource())
+    return api
 
-api.add_error_handler(ClientError, handle_error)
 
-api.add_route('/releases', ReleaseResource())
+api = create_api()
