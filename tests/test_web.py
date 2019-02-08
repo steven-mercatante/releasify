@@ -4,13 +4,29 @@ import json
 from falcon import testing
 import pytest
 
-from releasify.web import create_api
+from releasify.web import (
+    MissingRequiredArgError, 
+    create_api, 
+    get_required_arg,
+)
 
 
 
 @pytest.fixture()
 def client():
     return testing.TestClient(create_api())
+
+
+def test_get_required_arg():
+    args = {'foo': 'bar'}
+    assert get_required_arg(args, 'foo') == 'bar'
+
+
+def test_get_required_arg_raises():
+    args = {'foo': 'bar'}
+    
+    with pytest.raises(MissingRequiredArgError):
+        get_required_arg(args, 'baz')
 
 
 @pytest.mark.parametrize('payload,expected', [

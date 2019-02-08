@@ -46,13 +46,9 @@ class ReleaseResource(object):
     def on_post(self, req, resp):
         payload = json.load(req.bounded_stream)
 
-        # TODO: owner, repo, release_type should be required
-        try:
-            owner = payload['owner']
-        except (KeyError):
-            raise MissingRequiredArgError('owner')
-        repo = payload['repo']
-        release_type = payload['release_type']
+        owner = get_required_arg(payload, 'owner')
+        repo = get_required_arg(payload, 'repo')
+        release_type = get_required_arg(payload, 'release_type')
         dry_run = boolify(payload.get('dry_run', False))
         force_release = boolify(payload.get('force_release', False))
 
@@ -65,6 +61,13 @@ class ReleaseResource(object):
             'body': result['body'],
             'tag_name': result['tag_name'],
         }
+
+
+def get_required_arg(args, arg_name):
+    try:
+        return args[arg_name]
+    except (KeyError):
+        raise MissingRequiredArgError(arg_name)
 
 
 def handle_error(exception, req, resp, params):
