@@ -56,5 +56,6 @@ if __name__ == '__main__':
         Message: {str(e)}
         URL: {e.resp.url}
         Status code: {e.resp.status_code}
-        """.strip('')
+        """
         print(textwrap.dedent(error_msg))
+    

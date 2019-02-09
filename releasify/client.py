@@ -21,10 +21,15 @@ class ClientError(Exception):
 
 
 class UnauthorizedError(ClientError):
-    pass
+    def __init__(self, resp):
+        message = 'Unauthorized. Check your credentials.'
+        super(UnauthorizedError, self).__init__(message, resp)
+
 
 class NotFoundError(ClientError):
-    pass
+    def __init__(self, resp):
+        message = 'Resource not found'
+        super(NotFoundError, self).__init__(message, resp)
 
 
 class NoCommitsError(ClientError):
