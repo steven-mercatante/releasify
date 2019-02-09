@@ -104,7 +104,6 @@ class Client(object):
     def create_release(
         self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False, target_branch=None
     ):
-        # TODO: pass in draft, prerelease from cli.py
         try:
             ReleaseType(release_type)
         except (ValueError):

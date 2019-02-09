@@ -24,6 +24,8 @@ if __name__ == '__main__':
                         action='store_true')
     parser.add_argument('-f', '--force', help='Create a release even if there aren\'t any commits since the last release', 
                         action='store_true')
+    parser.add_argument('--draft', help='Is this a draft release?', action='store_true')                        
+    parser.add_argument('--prerelease', help='Is this a prerelease?', action='store_true')                        
     parser.add_argument('-ll', '--loglevel', 
                         help='Set the logging level. One of: debug, info, warning, error, critical. Defaults to `warning`', 
                         default='warning')
@@ -39,7 +41,7 @@ if __name__ == '__main__':
 
     try:
         result = client.create_release(
-            args.owner, args.repo, args.type, dry_run=args.dryrun, force_release=args.force, target_branch=args.branch
+            args.owner, args.repo, args.type, args.draft, args.prerelease, args.dryrun, args.force, args.branch
         )
 
         if result['ok']:
