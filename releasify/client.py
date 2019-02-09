@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 from enum import Enum
@@ -62,6 +63,7 @@ class Client(object):
 
     def _get(self, url):
         full_url = f'{API_ROOT}{url}'
+        logging.info('_get %s' % full_url)
         resp = requests.get(full_url, auth=self._get_auth())
 
         self._handle_api_response(resp)
@@ -70,6 +72,7 @@ class Client(object):
 
     def _post(self, url, data):
         full_url = f'{API_ROOT}{url}'
+        logging.info('_post %s' % full_url)
         resp = requests.post(full_url, auth=self._get_auth(), data=data)
 
         self._handle_api_response(resp)
