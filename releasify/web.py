@@ -1,5 +1,8 @@
 import base64
 import json
+import logging
+import os
+import sys
 
 import falcon
 
@@ -10,7 +13,18 @@ from .client import (
     NotFoundError,
     UnauthorizedError,
 )
+from .constants import INVALD_LOG_LEVEL_ERR
 from .utils import boolify
+
+if os.getenv('LOG_LEVEL'):
+    log_level = os.getenv('LOG_LEVEL').upper()
+else:
+    log_level = logging.WARNING
+
+try:    
+    logging.basicConfig(level=log_level)
+except ValueError:
+    sys.exit(INVALD_LOG_LEVEL_ERR.format(log_level=log_level))
 
 
 class MissingRequiredArgError(Exception):
