@@ -14,8 +14,11 @@ from .client import (
 )
 from .utils import boolify
 
-
-logging.basicConfig(level=os.getenv('LOG_LEVEL', logging.WARNING).upper())
+if os.getenv('LOG_LEVEL'):
+    log_level = os.getenv('LOG_LEVEL').upper()
+else:
+    log_level = logging.WARNING
+logging.basicConfig(level=log_level)
 
 
 class MissingRequiredArgError(Exception):
