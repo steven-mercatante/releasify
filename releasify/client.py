@@ -15,16 +15,21 @@ API_ROOT = 'https://api.github.com/'
 
 
 class ClientError(Exception):
-    def __init__(self, message=None):
+    def __init__(self, message=None, resp=None):
         super(ClientError, self).__init__(message)
+        self.resp = resp
 
 
 class UnauthorizedError(ClientError):
-    pass
+    def __init__(self, resp):
+        message = 'Unauthorized. Check your credentials.'
+        super(UnauthorizedError, self).__init__(message, resp)
 
 
 class NotFoundError(ClientError):
-    pass
+    def __init__(self, resp):
+        message = 'Resource not found'
+        super(NotFoundError, self).__init__(message, resp)
 
 
 class NoCommitsError(ClientError):
@@ -57,9 +62,9 @@ class Client(object):
     @staticmethod
     def _handle_api_response(resp):
         if resp.status_code == 401:
-            raise UnauthorizedError(resp)
+            raise UnauthorizedError(resp=resp)
         elif resp.status_code == 404:
-            raise NotFoundError(resp)
+            raise NotFoundError(resp=resp)
 
     def _get(self, url):
         full_url = f'{API_ROOT}{url}'
@@ -102,15 +107,14 @@ class Client(object):
         return self.compare_commits(owner, repo, base, head).json()['commits']
 
     def create_release(
-        self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False
+        self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False, target_branch=None
     ):
         try:
             ReleaseType(release_type)
         except (ValueError):
             raise InvalidReleaseTypeError(release_type)
 
-        # TODO: this should be an optional arg
-        target_branch = self.get_default_branch(owner, repo)
+        target_branch = target_branch or self.get_default_branch(owner, repo)
 
         commits = self.get_commits_since_release(owner, repo, target_branch)
         if len(commits) == 0 and not force_release:
