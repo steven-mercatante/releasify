@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+import textwrap
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -47,5 +48,11 @@ if __name__ == '__main__':
         else:
             # TODO: show error code & message?
             pass
-    except (Exception) as e:
-        print(e)
+    except Exception as e:
+        error_msg = f"""
+        An error occurred.
+        Message: {str(e)}
+        URL: {e.resp.url}
+        Status code: {e.resp.status_code}
+        """.strip('')
+        print(textwrap.dedent(error_msg))

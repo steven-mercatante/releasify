@@ -15,13 +15,13 @@ API_ROOT = 'https://api.github.com/'
 
 
 class ClientError(Exception):
-    def __init__(self, message=None):
+    def __init__(self, message=None, resp=None):
         super(ClientError, self).__init__(message)
+        self.resp = resp
 
 
 class UnauthorizedError(ClientError):
     pass
-
 
 class NotFoundError(ClientError):
     pass
@@ -57,9 +57,9 @@ class Client(object):
     @staticmethod
     def _handle_api_response(resp):
         if resp.status_code == 401:
-            raise UnauthorizedError(resp)
+            raise UnauthorizedError(resp=resp)
         elif resp.status_code == 404:
-            raise NotFoundError(resp)
+            raise NotFoundError(resp=resp)
 
     def _get(self, url):
         full_url = f'{API_ROOT}{url}'
@@ -104,6 +104,8 @@ class Client(object):
     def create_release(
         self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False, target_branch=None
     ):
+        # TODO: pass in draft, prerelease from cli.py
+        # TODO: pass in draft, prerelease from web.py
         try:
             ReleaseType(release_type)
         except (ValueError):
