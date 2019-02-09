@@ -63,11 +63,11 @@ class ReleaseResource(object):
         owner = get_required_arg(payload, 'owner')
         repo = get_required_arg(payload, 'repo')
         release_type = get_required_arg(payload, 'release_type')
-        dry_run = boolify(payload.get('dry_run', False))
-        force_release = boolify(payload.get('force_release', False))
+        dry_run = boolify(payload.get('dry_run'))
+        force_release = boolify(payload.get('force_release'))
+        draft = boolify(payload.get('draft'))
+        prerelease = boolify(payload.get('prerelease'))
         target_branch = payload.get('target_branch')
-        draft = payload.get('draft')
-        prerelease = payload.get('prerelease')
 
         client = Client(req.context['user'], req.context['password'])
 
