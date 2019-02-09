@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import sys
 
@@ -19,7 +20,10 @@ if __name__ == '__main__':
                         action='store_true')
     parser.add_argument('-f', '--force', help='Create a release even if there aren\'t any commits since the last release', 
                         action='store_true')
+    parser.add_argument('-ll', '--loglevel', help='Set the logging level. One of: debug, info, warning, error', default='warning')
     args = parser.parse_args()
+
+    logging.basicConfig(level=getattr(logging, args.loglevel.upper()))
 
     # TODO: let user & password be passed in via optional CLI args
     client = Client(os.getenv('GITHUB_USER'), os.getenv('GITHUB_PASSWORD'))
