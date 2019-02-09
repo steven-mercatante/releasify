@@ -1,5 +1,7 @@
 import base64
 import json
+import logging
+import os
 
 import falcon
 
@@ -11,6 +13,9 @@ from .client import (
     UnauthorizedError,
 )
 from .utils import boolify
+
+
+logging.basicConfig(level=os.getenv('LOG_LEVEL', logging.WARNING).upper())
 
 
 class MissingRequiredArgError(Exception):
