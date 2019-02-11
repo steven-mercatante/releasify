@@ -24,11 +24,12 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--force', help='Create a release even if there aren\'t any commits since the last release', 
                         action='store_true')
     parser.add_argument('--draft', help='Is this a draft release?', action='store_true')                        
-    parser.add_argument('--prerelease', help='Is this a prerelease?', action='store_true')                        
+    parser.add_argument('--prerelease', help='Is this a prerelease?', action='store_true', default=True)                        
     parser.add_argument('-ll', '--loglevel', 
                         help='Set the logging level. One of: debug, info, warning, error, critical. Defaults to `warning`', 
                         default='warning')
     args = parser.parse_args()
+    print(args)
 
     try:
         logging.basicConfig(level=getattr(logging, args.loglevel.upper()))
