@@ -29,7 +29,6 @@ if __name__ == '__main__':
                         help='Set the logging level. One of: debug, info, warning, error, critical. Defaults to `warning`', 
                         default='warning')
     args = parser.parse_args()
-    print(args)
 
     try:
         logging.basicConfig(level=getattr(logging, args.loglevel.upper()))
