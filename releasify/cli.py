@@ -6,9 +6,6 @@ import textwrap
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from dotenv import load_dotenv
-load_dotenv()
-
 from releasify.constants import INVALD_LOG_LEVEL_ERR
 from releasify.client import Client
 
@@ -18,6 +15,8 @@ if __name__ == '__main__':
     parser.add_argument('owner', help='The owner of the repo')
     parser.add_argument('repo', help='The name of the repo')
     parser.add_argument('type', help='The type of release')
+    parser.add_argument('-u', '--user', help='Your GitHub username')
+    parser.add_argument('-p', '--password', help='Your GitHub password or personal access token')
     parser.add_argument('-b', '--branch', 
                         help='The branch on which to create the release. Defaults to whatever the target branch is set to in the repo settings')
     parser.add_argument('-d', '--dryrun', help='Perform a dry run (doesn\'t create the release)', 
@@ -25,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--force', help='Create a release even if there aren\'t any commits since the last release', 
                         action='store_true')
     parser.add_argument('--draft', help='Is this a draft release?', action='store_true')                        
-    parser.add_argument('--prerelease', help='Is this a prerelease?', action='store_true')                        
+    parser.add_argument('--prerelease', help='Is this a prerelease?', action='store_true', default=True)                        
     parser.add_argument('-ll', '--loglevel', 
                         help='Set the logging level. One of: debug, info, warning, error, critical. Defaults to `warning`', 
                         default='warning')
@@ -36,8 +35,9 @@ if __name__ == '__main__':
     except AttributeError:
         print(INVALD_LOG_LEVEL_ERR.format(log_level=args.loglevel))
 
-    # TODO: let user & password be passed in via optional CLI args
-    client = Client(os.getenv('GITHUB_USER'), os.getenv('GITHUB_PASSWORD'))
+    user = args.user or os.getenv('GITHUB_USER')
+    password = args.password or os.getenv('GITHUB_PASSWORD')
+    client = Client(user, password)
 
     try:
         result = client.create_release(
