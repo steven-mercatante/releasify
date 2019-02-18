@@ -1,3 +1,5 @@
 --ignore-dir=venv
+--ignore-dir=build
+--ignore-dir=.pytest_cache
 --ignore-file=is:.coverage
 --ignore-file=is:coverage.xml
