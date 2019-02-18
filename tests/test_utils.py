@@ -1,6 +1,6 @@
 import pytest
 
-from releasify.utils import (boolify, increment_version)
+from releasify.utils import increment_version
 
 
 @pytest.mark.parametrize("test_input,expected", [
@@ -28,21 +28,3 @@ def test_increment_minor_version(test_input, expected):
 ])
 def test_increment_patch_version(initial_version, expected):
     assert increment_version(initial_version, 'patch') == expected
-
-
-@pytest.mark.parametrize("input,expected", [
-    ('y', True),
-    ('Y', True),
-    ('yes', True),
-    ('YES', True),
-    ('Yes', True),
-    ('true', True),
-    ('True', True),
-    (1, True),
-    ('1', True),
-    ('no', False),
-    ('N', False),
-    ('false', False),
-])
-def test_boolify(input, expected):
-    assert boolify(input) == expected
