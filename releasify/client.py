@@ -1,3 +1,4 @@
+# TODO: organize Errors into their own package
 import json
 import logging
 import os
@@ -151,6 +152,9 @@ class Client(object):
             'resp': resp,
             'tag_name': next_tag,
             'body': body,
+            'dry_run': dry_run,
+            'prerelease': prerelease,
+            'force_release': force_release,
         }
 
 
