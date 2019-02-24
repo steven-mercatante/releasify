@@ -13,6 +13,7 @@ from releasify.exceptions import (
     NoCommitsError,
 )
 
+
 def test_build_release_body_with_messages():
     messages = ['foo', 'bar', 'baz']
     expected = "- foo\n- bar\n- baz"
@@ -64,13 +65,13 @@ def test_create_release_exits_if_no_commits_since_last_release():
         client.create_release('owner', 'repo', 'major', dry_run=True)
 
 
-def test_create_release_with_force_release_flag_doesnt_raise():
+def test_create_release_with_force_flag_doesnt_raise():
     client = ReleasifyClient('user', 'password')
     client.get_default_branch = MagicMock(return_value='master')
     client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
     client.get_commits_since_release = MagicMock(return_value=[])
     
-    resp = client.create_release('owner', 'repo', 'major', dry_run=True, force_release=True)
+    resp = client.create_release('owner', 'repo', 'major', dry_run=True, force=True)
 
     assert resp['ok'] is True
 
@@ -80,3 +81,27 @@ def test_passing_invalid_release_type_raises():
     
     with pytest.raises(InvalidReleaseTypeError):
         resp = client.create_release('owner', 'repo', 'bad_release_type', dry_run=True)
+
+
+def test_explicit_next_tag():
+    client = ReleasifyClient('user', 'password')
+    client.get_default_branch = MagicMock(return_value='master')
+    client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
+    client.get_commits_since_release = MagicMock(return_value=[])
+
+    next_tag = 'this-is-an-explicit-tag'
+    resp = client.create_release('owner', 'repo', 'minor', dry_run=True, force=True, next_tag=next_tag)
+
+    assert resp['tag_name'] == next_tag
+
+
+def test_explicit_body():
+    client = ReleasifyClient('user', 'password')
+    client.get_default_branch = MagicMock(return_value='master')
+    client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
+    client.get_commits_since_release = MagicMock(return_value=[])
+
+    body = 'this is a dope custom body'
+    resp = client.create_release('owner', 'repo', 'minor', dry_run=True, force=True, body=body)
+
+    assert resp['body'] == body

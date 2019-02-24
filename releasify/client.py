@@ -74,9 +74,9 @@ class ReleasifyClient(object):
         base = release or self.get_latest_release_tag(owner, repo)
         return self.compare_commits(owner, repo, base, head).json()['commits']
 
-    # TODO: rename force_release to force
     def create_release(
-        self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False, target_branch=None
+        self, owner, repo, release_type, draft=False, prerelease=True,
+        dry_run=False, force=False, target_branch=None, next_tag=None, body=None
     ):
         try:
             ReleaseType(release_type)
@@ -86,16 +86,18 @@ class ReleasifyClient(object):
         target_branch = target_branch or self.get_default_branch(owner, repo)
 
         commits = self.get_commits_since_release(owner, repo, target_branch)
-        if len(commits) == 0 and not force_release:
+        if len(commits) == 0 and not force:
             raise NoCommitsError()
 
         merge_messages = get_merge_messages(commits)
 
-        body = build_release_body(merge_messages)
+        if body is None:
+            body = build_release_body(merge_messages)
 
-        # TODO: handle case where there are no existing releases and treat the base as v0.0.0
-        latest_release_tag = self.get_latest_release_tag(owner, repo)
-        next_tag = increment_version(latest_release_tag, release_type)
+        if next_tag is None:
+            # TODO: handle case where there are no existing releases and treat the base as v0.0.0
+            latest_release_tag = self.get_latest_release_tag(owner, repo)
+            next_tag = increment_version(latest_release_tag, release_type)
 
         url = f'repos/{owner}/{repo}/releases'
         payload = json.dumps({
@@ -122,7 +124,7 @@ class ReleasifyClient(object):
             'body': body,
             'dry_run': dry_run,
             'prerelease': prerelease,
-            'force_release': force_release,
+            'force': force,
         }
 
 
