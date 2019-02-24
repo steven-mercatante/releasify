@@ -76,7 +76,7 @@ class ReleasifyClient(object):
 
     def create_release(
         self, owner, repo, release_type, draft=False, prerelease=True,
-        dry_run=False, force=False, target_branch=None, next_tag=None
+        dry_run=False, force=False, target_branch=None, next_tag=None, body=None
     ):
         try:
             ReleaseType(release_type)
@@ -91,7 +91,8 @@ class ReleasifyClient(object):
 
         merge_messages = get_merge_messages(commits)
 
-        body = build_release_body(merge_messages)
+        if body is None:
+            body = build_release_body(merge_messages)
 
         if next_tag is None:
             # TODO: handle case where there are no existing releases and treat the base as v0.0.0

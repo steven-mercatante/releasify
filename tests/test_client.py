@@ -93,3 +93,15 @@ def test_explicit_next_tag():
     resp = client.create_release('owner', 'repo', 'minor', dry_run=True, force=True, next_tag=next_tag)
 
     assert resp['tag_name'] == next_tag
+
+
+def test_explicit_body():
+    client = ReleasifyClient('user', 'password')
+    client.get_default_branch = MagicMock(return_value='master')
+    client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
+    client.get_commits_since_release = MagicMock(return_value=[])
+
+    body = 'this is a dope custom body'
+    resp = client.create_release('owner', 'repo', 'minor', dry_run=True, force=True, body=body)
+
+    assert resp['body'] == body
