@@ -52,7 +52,7 @@ class ReleaseType(Enum):
     PATCH = 'patch'
 
 
-class Client(object):
+class ReleasifyClient(object):
     def __init__(self, user, password):
         self.user = user
         self.password = password
@@ -107,6 +107,7 @@ class Client(object):
         base = release or self.get_latest_release_tag(owner, repo)
         return self.compare_commits(owner, repo, base, head).json()['commits']
 
+    # TODO: rename force_release to force
     def create_release(
         self, owner, repo, release_type, draft=False, prerelease=True, dry_run=False, force_release=False, target_branch=None
     ):

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from releasify.client import (
-    Client,
+    ReleasifyClient,
     InvalidReleaseTypeError,
     NoCommitsError,
     build_release_body,
@@ -54,7 +54,7 @@ def test_massage_merge_message(input, expected):
 
 
 def test_create_release_exits_if_no_commits_since_last_release():
-    client = Client('user', 'password')
+    client = ReleasifyClient('user', 'password')
     client.get_default_branch = MagicMock(return_value='master')
     client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
     client.get_commits_since_release = MagicMock(return_value=[])
@@ -64,7 +64,7 @@ def test_create_release_exits_if_no_commits_since_last_release():
 
 
 def test_create_release_with_force_release_flag_doesnt_raise():
-    client = Client('user', 'password')
+    client = ReleasifyClient('user', 'password')
     client.get_default_branch = MagicMock(return_value='master')
     client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
     client.get_commits_since_release = MagicMock(return_value=[])
@@ -75,7 +75,7 @@ def test_create_release_with_force_release_flag_doesnt_raise():
 
 
 def test_passing_invalid_release_type_raises():
-    client = Client('user', 'password')
+    client = ReleasifyClient('user', 'password')
     
     with pytest.raises(InvalidReleaseTypeError):
         resp = client.create_release('owner', 'repo', 'bad_release_type', dry_run=True)
