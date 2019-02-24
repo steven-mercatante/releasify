@@ -64,13 +64,13 @@ def test_create_release_exits_if_no_commits_since_last_release():
         client.create_release('owner', 'repo', 'major', dry_run=True)
 
 
-def test_create_release_with_force_release_flag_doesnt_raise():
+def test_create_release_with_force_flag_doesnt_raise():
     client = ReleasifyClient('user', 'password')
     client.get_default_branch = MagicMock(return_value='master')
     client.get_latest_release_tag = MagicMock(return_value='v1.0.0')
     client.get_commits_since_release = MagicMock(return_value=[])
     
-    resp = client.create_release('owner', 'repo', 'major', dry_run=True, force_release=True)
+    resp = client.create_release('owner', 'repo', 'major', dry_run=True, force=True)
 
     assert resp['ok'] is True
 
