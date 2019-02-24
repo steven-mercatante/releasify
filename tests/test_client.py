@@ -4,13 +4,14 @@ import pytest
 
 from releasify.client import (
     ReleasifyClient,
-    InvalidReleaseTypeError,
-    NoCommitsError,
     build_release_body,
     get_merge_messages,
     massage_merge_message,
 )
-
+from releasify.exceptions import (
+    InvalidReleaseTypeError,
+    NoCommitsError,
+)
 
 def test_build_release_body_with_messages():
     messages = ['foo', 'bar', 'baz']
