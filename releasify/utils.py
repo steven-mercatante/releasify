@@ -25,7 +25,3 @@ def increment_version(version, release_type):
 		patch += 1
 	
 	return f'v{major}.{minor}.{patch}'
-
-
-def boolify(s):
-	return str(s).lower() in ['yes', 'y', 'true', '1']
