@@ -1,6 +1,13 @@
 import re
+from enum import Enum
 
-pattern = re.compile(r'[vV](?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)')
+version_pattern = re.compile(r'[vV](?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)')
+
+
+class ReleaseType(Enum):
+    MAJOR = 'major'
+    MINOR = 'minor'
+    PATCH = 'patch'
 
 
 def increment_version(version, release_type):
@@ -9,7 +16,7 @@ def increment_version(version, release_type):
 	Returns:
 		str -- The incremented semantic version string
 	"""
-	parts = pattern.match(version).groupdict()
+	parts = version_pattern.match(version).groupdict()
 	major = int(parts['major'])
 	minor = int(parts['minor'])
 	patch = int(parts['patch'])
