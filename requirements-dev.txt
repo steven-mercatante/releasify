@@ -1,5 +1,5 @@
 -r requirements.txt
-codecov==2.0.15
+codecov==2.0.16
 ipython
 pytest
 pytest-cov==2.6.0
